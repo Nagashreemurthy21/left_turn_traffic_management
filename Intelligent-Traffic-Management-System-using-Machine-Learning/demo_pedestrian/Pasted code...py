@@ -213,147 +213,30 @@ def process_frame(frame):
     cv2.putText(frame, f"Conflict: {conflict_count}", (30, 270),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,255,255), 2)
 
-    # 🔥 ADD THIS PART ONLY (already inserted in correct place)
-
     cv2.putText(frame, f"Pedestrians: {pedestrian_count}", (30, 300),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,255,255), 2)
-
-    # ================= TERMINAL OUTPUT =================
-    if decision.startswith("ALLOW"):
-        left_status = "GREEN ✅"
-        conflict_status = "RED ❌"
-
-    elif decision.startswith("BLOCK"):
-        left_status = "RED ❌"
-        conflict_status = "GREEN 🚫"
-
-    elif decision.startswith("CONTROLLED"):
-        left_status = "YELLOW ⚠️"
-        conflict_status = "YELLOW ⚠️"
-
-    else:
-        left_status = "WAIT ⚠️"
-        conflict_status = "WAIT ⚠️"
-
-    print("\n================ TRAFFIC STATUS ================")
-    print(f"LEFT LANE     : {left_status}")
-    print(f"CONFLICT LANE : {conflict_status}")
-    print(f"DECISION      : {decision}")
-    print("===============================================")
 
     return frame, decision, confidence_score
 
 
 # ---------------- CAMERA MODE ----------------
-# ---------------- TRAFFIC SIGNAL CLASS ----------------
-class TrafficSignal:
-    def __init__(self):
-        self.state = "RED"
-        self.last_change = time.time()
-
-    def update(self, decision):
-        now = time.time()
-
-        if decision.startswith("ALLOW"):
-            self.state = "GREEN"
-        elif decision.startswith("CONTROLLED"):
-            self.state = "YELLOW"
-        else:
-            self.state = "RED"
-
-        self.last_change = now
-
-    def draw(self, frame):
-        x, y = 500, 50
-
-        colors = {
-            "RED": (0,0,255),
-            "YELLOW": (0,255,255),
-            "GREEN": (0,255,0)
-        }
-
-        cv2.putText(frame, f"Signal: {self.state}", (x, y),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, colors[self.state], 2)
-
-# ---------------- MULTI CCTV SYSTEM ----------------
 if mode == "camera":
 
-    # 🔥 Multiple cameras (simulate smart city)
-    cameras = [
-        cv2.VideoCapture(0),   # Junction 1
-        # cv2.VideoCapture(1), # Add more cameras if available
-    ]
-
-    signals = [TrafficSignal() for _ in cameras]
-
-    manual_mode = False
-    manual_decision = ""
+    cap = cv2.VideoCapture(0)
 
     while True:
-
-        for i, cap in enumerate(cameras):
-
-            ret, frame = cap.read()
-            if not ret:
-                continue
-
-            frame, decision, conf = process_frame(frame)
-
-            # 🔥 MANUAL OVERRIDE
-            if manual_mode:
-                decision = manual_decision
-
-            # 🔥 UPDATE SIGNAL
-            signals[i].update(decision)
-
-            # 🔥 DRAW SIGNAL
-            signals[i].draw(frame)
-
-            # 🔥 UI PANEL
-            overlay = frame.copy()
-            cv2.rectangle(overlay, (10,10), (420,200), (0,0,0), -1)
-            cv2.addWeighted(overlay,0.6,frame,0.4,0,frame)
-
-            cv2.putText(frame,f"🚦 Junction {i+1}",(20,40),
-                        cv2.FONT_HERSHEY_SIMPLEX,0.7,(0,255,255),2)
-
-            cv2.putText(frame,f"Decision: {decision}",(20,70),
-                        cv2.FONT_HERSHEY_SIMPLEX,0.6,(255,255,255),2)
-
-            mode_text = "MANUAL 🔴" if manual_mode else "AUTO 🟢"
-            cv2.putText(frame,f"Mode: {mode_text}",(20,100),
-                        cv2.FONT_HERSHEY_SIMPLEX,0.6,(255,255,255),2)
-
-            # Buttons
-            cv2.putText(frame,"[A] Allow",(20,130),cv2.FONT_HERSHEY_SIMPLEX,0.5,(0,255,0),2)
-            cv2.putText(frame,"[B] Block",(120,130),cv2.FONT_HERSHEY_SIMPLEX,0.5,(0,0,255),2)
-            cv2.putText(frame,"[C] Control",(220,130),cv2.FONT_HERSHEY_SIMPLEX,0.5,(0,165,255),2)
-            cv2.putText(frame,"[R] Auto",(20,160),cv2.FONT_HERSHEY_SIMPLEX,0.5,(255,255,0),2)
-
-            cv2.imshow(f"🚦 Junction {i+1}", frame)
-
-        key = cv2.waitKey(1) & 0xFF
-
-        if key == ord('a'):
-            manual_mode = True
-            manual_decision = "ALLOW ✅"
-
-        elif key == ord('b'):
-            manual_mode = True
-            manual_decision = "BLOCK ❌"
-
-        elif key == ord('c'):
-            manual_mode = True
-            manual_decision = "CONTROLLED ⚠️"
-
-        elif key == ord('r'):
-            manual_mode = False
-
-        elif key == 27:
+        ret, frame = cap.read()
+        if not ret:
             break
 
-    for cap in cameras:
-        cap.release()
+        frame, decision, conf = process_frame(frame)
+
+        cv2.imshow("🚦 Live Traffic System", frame)
+
+        if cv2.waitKey(1) == 27:
+            break
+
+    cap.release()
 
 # ---------------- DEMO MODE ----------------
 else:
