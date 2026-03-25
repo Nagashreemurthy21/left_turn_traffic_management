@@ -1,0 +1,26 @@
+<routes>
+    <vType id="car" accel="1.0" decel="4.5" length="5" maxSpeed="10"/>
+
+    <!-- LEFT TURN -->
+    <route id="left_top_to_right" edges="e1 e6"/>
+    <route id="left_bottom_to_left" edges="e3 e8"/>
+    <route id="left_left_to_top" edges="e5 e4"/>
+    <route id="left_right_to_bottom" edges="e7 e2"/>
+
+    <!-- STRAIGHT -->
+    <route id="straight_top_to_bottom" edges="e1 e2"/>
+    <route id="straight_bottom_to_top" edges="e3 e4"/>
+    <route id="straight_left_to_right" edges="e5 e6"/>
+    <route id="straight_right_to_left" edges="e7 e8"/>
+
+    <!-- RIGHT TURN -->
+    <route id="right_top_to_left" edges="e1 e8"/>
+    <route id="right_bottom_to_right" edges="e3 e6"/>
+    <route id="right_left_to_bottom" edges="e5 e2"/>
+    <route id="right_right_to_top" edges="e7 e4"/>
+
+    <!-- INITIAL VEHICLES -->
+    <vehicle id="init0" type="car" route="left_top_to_right" depart="0"/>
+    <vehicle id="init1" type="car" route="straight_top_to_bottom" depart="1"/>
+    <vehicle id="init2" type="car" route="right_top_to_left" depart="2"/>
+</routes>
